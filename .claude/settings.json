@@ -1,0 +1,33 @@
+{
+  "//": "Committed .claude/settings.json for a repo. These are EXAMPLE defaults — review the deny list against this repo's real layout before relying on it. Settings are hard-enforced by Claude Code (deny evaluated before ask before allow), unlike CLAUDE.md guidance. Personal, non-committed overrides go in .claude/settings.local.json (gitignored).",
+  "permissions": {
+    "defaultMode": "default",
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)",
+      "Read(./**/credentials*)",
+      "Read(./**/*.pem)",
+      "Read(./**/*.key)",
+      "Read(./**/id_rsa*)",
+      "Read(./**/*serviceaccount*.json)",
+      "Read(./config/production*)",
+      "Read(./**/*.prod.*)",
+      "Read(./config.toml)",
+      "Read(./**/*.db)",
+      "Bash(curl *)",
+      "Bash(wget *)",
+      "Bash(rm -rf *)",
+      "Bash(git push --force *)"
+    ],
+    "ask": [
+      "Bash(git push *)",
+      "Bash(git commit *)"
+    ]
+  },
+  "_notes": {
+    "review": "Add repo-specific sensitive paths (deploy manifests, infra state like *.tfstate, cloud config). Remove a deny only if the repo genuinely needs it — e.g. allow a specific curl via an allow rule rather than dropping the blanket deny.",
+    "build_artifacts": "node_modules/, dist/, build/, __pycache__/, .venv/ belong in .gitignore, not here — this file controls tool access, not version control.",
+    "hooks": "For rules that must run every time (e.g. block a commit that contains a secret), add a PreToolUse hook — stronger than deny for lifecycle enforcement."
+  }
+}

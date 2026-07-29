@@ -1,0 +1,17 @@
+# --- Claude Code / Code HQ ---
+CLAUDE.local.md
+.claude/settings.local.json
+.env
+.env.*
+secrets/
+node_modules/
+dist/
+build/
+__pycache__/
+.venv/
+
+# --- Online Footprint Auditor: data-boundary defense in depth ---
+# The private data area lives outside this repo entirely (platformdirs),
+# so none of this should ever appear here — these are belt-and-suspenders.
+*.db
+config.toml
