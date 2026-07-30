@@ -27,6 +27,10 @@ class Finding:
     summary: str
     risk_score: int
     discovered_at: datetime
+    automated: bool = True
+    """False when a scanner couldn't check this itself and is pointing the operator at a
+    link to check by hand (no free automated option exists, or no API credentials are
+    configured) — e.g. name search, reverse-image search, data broker, social media."""
     id: int | None = None
     """Set by Storage once the finding has been saved; None for freshly-scanned findings."""
 

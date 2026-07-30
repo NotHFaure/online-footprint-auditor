@@ -24,7 +24,8 @@ CREATE TABLE IF NOT EXISTS findings (
     url TEXT,
     summary TEXT,
     risk_score INTEGER NOT NULL,
-    discovered_at TEXT NOT NULL
+    discovered_at TEXT NOT NULL,
+    automated INTEGER NOT NULL DEFAULT 1
 );
 
 CREATE TABLE IF NOT EXISTS remediation (
@@ -53,8 +54,9 @@ class Storage:
             cursor = self._conn.execute(
                 """
                 INSERT INTO findings
-                    (target_name, source, category, url, summary, risk_score, discovered_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                    (target_name, source, category, url, summary, risk_score,
+                     discovered_at, automated)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     target.name,
@@ -64,6 +66,7 @@ class Storage:
                     finding.summary,
                     finding.risk_score,
                     finding.discovered_at.isoformat(),
+                    int(finding.automated),
                 ),
             )
             finding_id = cursor.lastrowid
@@ -88,6 +91,7 @@ class Storage:
                     summary=finding.summary,
                     risk_score=finding.risk_score,
                     discovered_at=finding.discovered_at,
+                    automated=finding.automated,
                     id=finding_id,
                 )
             )
@@ -98,7 +102,7 @@ class Storage:
         """Return all findings previously saved for target_name."""
         rows = self._conn.execute(
             """
-            SELECT id, source, category, url, summary, risk_score, discovered_at
+            SELECT id, source, category, url, summary, risk_score, discovered_at, automated
             FROM findings
             WHERE target_name = ?
             """,
@@ -113,6 +117,7 @@ class Storage:
                 summary=row[4],
                 risk_score=row[5],
                 discovered_at=datetime.fromisoformat(row[6]),
+                automated=bool(row[7]),
             )
             for row in rows
         ]
