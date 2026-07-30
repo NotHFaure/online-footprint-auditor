@@ -13,7 +13,13 @@ import sqlite3
 from datetime import UTC, datetime
 from pathlib import Path
 
-from footprint_auditor.models import Finding, RemediationStatus, Target, can_transition
+from footprint_auditor.models import (
+    Finding,
+    RemediationRecord,
+    RemediationStatus,
+    Target,
+    can_transition,
+)
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS findings (
@@ -121,6 +127,44 @@ class Storage:
             )
             for row in rows
         ]
+
+    def get_finding_by_id(self, finding_id: int) -> Finding | None:
+        """Return a single finding by its storage-assigned id, or None if it doesn't exist."""
+        row = self._conn.execute(
+            """
+            SELECT id, source, category, url, summary, risk_score, discovered_at, automated
+            FROM findings
+            WHERE id = ?
+            """,
+            (finding_id,),
+        ).fetchone()
+        if row is None:
+            return None
+        return Finding(
+            id=row[0],
+            source=row[1],
+            category=row[2],
+            url=row[3],
+            summary=row[4],
+            risk_score=row[5],
+            discovered_at=datetime.fromisoformat(row[6]),
+            automated=bool(row[7]),
+        )
+
+    def get_remediation_status(self, finding_id: int) -> RemediationRecord | None:
+        """Return the remediation record for a finding, or None if it doesn't exist."""
+        row = self._conn.execute(
+            "SELECT status, status_history, notes FROM remediation WHERE finding_id = ?",
+            (finding_id,),
+        ).fetchone()
+        if row is None:
+            return None
+        return RemediationRecord(
+            finding_id=finding_id,
+            status=RemediationStatus(row[0]),
+            status_history=_decode_history(row[1]),
+            notes=row[2],
+        )
 
     def update_remediation_status(
         self,

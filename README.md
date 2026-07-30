@@ -6,13 +6,36 @@ This repository contains tool code only — no scan results, target data, or cre
 
 ## Status
 
-Scaffold only. Scanner logic, CLI commands, and storage are not implemented yet.
+Core scanning, scoring, output generation, and remediation are implemented and wired into a CLI. Automated unit tests (Phase 6) are not written yet.
 
 ## Install
 
 ```
 uv sync
 ```
+
+## Usage
+
+Fill in `config.toml` (created automatically on first run, in the private data directory below — see the printed path), then:
+
+```
+uv run footprint-auditor scan
+```
+
+Runs every scanner against the target configured in `config.toml`, scores each finding, persists it, and writes `report.md`, `checklist.md`, and `risk_list.md` into the private data directory (not the repo, and not your terminal — these files can contain your target's PII).
+
+```
+uv run footprint-auditor status
+```
+
+Read-only view of every finding's current remediation status.
+
+```
+uv run footprint-auditor remediate --finding-id <id>
+uv run footprint-auditor remediate --finding-id <id> --confirm-sent
+```
+
+Only applies to `data_broker` findings. The first form writes manual opt-out instructions (or submits automatically, for the handful of brokers that support it — most don't yet); the second marks it `REQUESTED` once you've actually sent the request yourself.
 
 ## Private data
 
