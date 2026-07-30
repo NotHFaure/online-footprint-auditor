@@ -14,11 +14,13 @@ def storage() -> Iterator[Storage]:
     s.close()
 
 
-def _finding(category: str = "data_broker", automated: bool = False) -> Finding:
+def _finding(
+    category: str = "data_broker", automated: bool = False, url: str = "https://example.com"
+) -> Finding:
     return Finding(
         source="TestBroker",
         category=category,
-        url="https://example.com",
+        url=url,
         summary="test finding",
         risk_score=0,
         discovered_at=datetime.now(UTC),
@@ -26,11 +28,43 @@ def _finding(category: str = "data_broker", automated: bool = False) -> Finding:
     )
 
 
-def test_save_findings_assigns_unique_ids(storage: Storage) -> None:
+def test_save_findings_assigns_unique_ids_to_distinct_findings(storage: Storage) -> None:
     target = Target(name="Test Person")
-    saved = storage.save_findings(target, [_finding(), _finding()])
+    saved = storage.save_findings(
+        target, [_finding(url="https://example.com/a"), _finding(url="https://example.com/b")]
+    )
     assert all(f.id is not None for f in saved)
     assert len({f.id for f in saved}) == 2
+
+
+def test_save_findings_deduplicates_identical_finding(storage: Storage) -> None:
+    target = Target(name="Test Person")
+    first = storage.save_findings(target, [_finding()])
+    second = storage.save_findings(target, [_finding()])
+
+    assert first[0].id == second[0].id
+    assert len(storage.get_findings_by_target("Test Person")) == 1
+
+
+def test_save_findings_does_not_dedupe_across_different_urls(storage: Storage) -> None:
+    target = Target(name="Test Person")
+    storage.save_findings(target, [_finding(url="https://example.com/a")])
+    storage.save_findings(target, [_finding(url="https://example.com/b")])
+
+    assert len(storage.get_findings_by_target("Test Person")) == 2
+
+
+def test_save_findings_dedup_preserves_remediation_progress(storage: Storage) -> None:
+    target = Target(name="Test Person")
+    saved = storage.save_findings(target, [_finding()])
+    storage.update_remediation_status(saved[0].id, RemediationStatus.REQUESTED)
+
+    storage.save_findings(target, [_finding()])
+
+    record = storage.get_remediation_status(saved[0].id)
+    assert record is not None
+    assert record.status == RemediationStatus.REQUESTED
+    assert len(record.status_history) == 2
 
 
 def test_get_findings_by_target_round_trips(storage: Storage) -> None:

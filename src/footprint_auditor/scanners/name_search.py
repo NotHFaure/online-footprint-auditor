@@ -29,7 +29,7 @@ class NameSearchScanner:
         now = datetime.now(UTC)
 
         if self._searxng is not None:
-            results = self._searxng.search(f'"{target.name}"')
+            results = self._searxng.search(f'"{target.name}"', must_contain=target.name)
             if results:
                 return [
                     Finding(

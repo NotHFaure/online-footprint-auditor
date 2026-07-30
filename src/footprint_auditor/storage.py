@@ -54,9 +54,39 @@ class Storage:
         self._conn.commit()
 
     def save_findings(self, target: Target, findings: list[Finding]) -> list[Finding]:
-        """Persist findings for a target and seed a FOUND remediation record each."""
+        """Persist findings for a target, seeding a FOUND remediation record each.
+
+        Skips re-inserting a finding that already exists for this exact
+        (target, source, category, url) — the original id and its full
+        remediation history are preserved, not reset, so re-scanning the
+        same target repeatedly doesn't accumulate duplicate rows or wipe out
+        remediation progress already tracked for something still present.
+        """
         saved: list[Finding] = []
         for finding in findings:
+            existing = self._conn.execute(
+                """
+                SELECT id, source, category, url, summary, risk_score, discovered_at, automated
+                FROM findings
+                WHERE target_name = ? AND source = ? AND category = ? AND url = ?
+                """,
+                (target.name, finding.source, finding.category, finding.url),
+            ).fetchone()
+            if existing is not None:
+                saved.append(
+                    Finding(
+                        id=existing[0],
+                        source=existing[1],
+                        category=existing[2],
+                        url=existing[3],
+                        summary=existing[4],
+                        risk_score=existing[5],
+                        discovered_at=datetime.fromisoformat(existing[6]),
+                        automated=bool(existing[7]),
+                    )
+                )
+                continue
+
             cursor = self._conn.execute(
                 """
                 INSERT INTO findings

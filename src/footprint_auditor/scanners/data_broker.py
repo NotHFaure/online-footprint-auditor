@@ -30,7 +30,9 @@ class DataBrokerScanner:
         for broker in BROKERS:
             automated_hits: list[Finding] = []
             if self._searxng is not None:
-                results = self._searxng.search(f'site:{broker.domain} "{target.name}"')
+                results = self._searxng.search(
+                    f'site:{broker.domain} "{target.name}"', must_contain=target.name
+                )
                 automated_hits = [
                     Finding(
                         source=broker.name,

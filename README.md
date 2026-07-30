@@ -22,7 +22,7 @@ Fill in `config.toml` (created automatically on first run, in the private data d
 uv run footprint-auditor scan
 ```
 
-Runs every scanner against the target configured in `config.toml`, scores each finding, persists it, and writes `report.md`, `checklist.md`, and `risk_list.md` into the private data directory (not the repo, and not your terminal — these files can contain your target's PII).
+Runs every scanner against the target configured in `config.toml`, scores each finding, persists it, and writes `report.md`, `checklist.md`, `risk_list.md`, and `profile.md` (a deterministic, non-AI summary — category counts, breach exposure, and a top-5 risk list) into the private data directory (not the repo, and not your terminal — these files can contain your target's PII). Re-running `scan` deduplicates against what's already on record — it won't create duplicate findings or reset remediation progress for something still present.
 
 ```
 uv run footprint-auditor status

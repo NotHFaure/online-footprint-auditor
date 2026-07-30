@@ -45,7 +45,9 @@ class SocialMediaScanner:
         for platform, domain in _PLATFORM_DOMAINS:
             automated_hits: list[Finding] = []
             if self._searxng is not None:
-                results = self._searxng.search(f'site:{domain} "{target.name}"')
+                results = self._searxng.search(
+                    f'site:{domain} "{target.name}"', must_contain=target.name
+                )
                 automated_hits = [
                     Finding(
                         source=platform,

@@ -16,6 +16,7 @@ import click
 from footprint_auditor.config import get_data_dir, load_config
 from footprint_auditor.data.broker_list import BROKERS
 from footprint_auditor.models import RemediationStatus, Target
+from footprint_auditor.profile import generate_profile
 from footprint_auditor.remediation.automated import AUTOMATED_SUBMITTERS
 from footprint_auditor.remediation.manual import write_manual_instructions
 from footprint_auditor.report import generate_checklist, generate_report, generate_risk_list
@@ -56,6 +57,7 @@ def _run_scan(
     (output_dir / "report.md").write_text(generate_report(saved), encoding="utf-8")
     (output_dir / "checklist.md").write_text(generate_checklist(saved), encoding="utf-8")
     (output_dir / "risk_list.md").write_text(generate_risk_list(saved), encoding="utf-8")
+    (output_dir / "profile.md").write_text(generate_profile(saved), encoding="utf-8")
 
     return ScanSummary(finding_count=len(saved), output_dir=output_dir)
 

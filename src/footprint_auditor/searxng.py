@@ -27,12 +27,20 @@ class SearxngClient:
         except httpx.HTTPError:
             return False
 
-    def search(self, query: str) -> list[dict]:
+    def search(self, query: str, must_contain: str | None = None) -> list[dict]:
         """Return up to MAX_RESULTS_PER_QUERY result dicts, or [] on any failure.
 
         Failing soft (never raising) is deliberate: every caller already
         treats zero results as "fall back to manual", so a SearXNG hiccup
         mid-scan degrades gracefully instead of crashing the whole scan.
+
+        must_contain, if given, discards any result whose title/content
+        doesn't literally contain that string (case-insensitive). This is a
+        real fix for a real problem: quoted phrases aren't reliably enforced
+        by whichever backend engine responds, so "Harrison Faure" can match
+        "Harrison Farrar" or "Andre Faure" as separate-word hits. A substring
+        check is deliberately simple — it won't catch every variant (reordered
+        names, unusual whitespace) but it removes the clear false positives.
         """
         try:
             response = self._client.get(
@@ -42,6 +50,14 @@ class SearxngClient:
             )
             response.raise_for_status()
             results = response.json().get("results", [])
+            if must_contain:
+                needle = must_contain.lower()
+                results = [
+                    result
+                    for result in results
+                    if needle in result.get("title", "").lower()
+                    or needle in result.get("content", "").lower()
+                ]
             return results[:MAX_RESULTS_PER_QUERY]
         except httpx.HTTPError:
             return []
