@@ -26,6 +26,7 @@ from footprint_auditor.scanners.name_search import NameSearchScanner
 from footprint_auditor.scanners.reverse_image import ReverseImageScanner
 from footprint_auditor.scanners.social_media import SocialMediaScanner
 from footprint_auditor.scoring import score_finding
+from footprint_auditor.searxng import DEFAULT_BASE_URL, SearxngClient
 from footprint_auditor.storage import Storage
 
 
@@ -130,11 +131,24 @@ def _build_target(config: dict) -> Target:
 
 
 def _build_scanners(config: dict) -> list[Scanner]:
+    searxng_base_url = config.get("searxng", {}).get("base_url", DEFAULT_BASE_URL)
+    searxng_client = SearxngClient(base_url=searxng_base_url)
+    searxng: SearxngClient | None
+    if searxng_client.is_available():
+        click.echo(f"Automated search enabled via SearXNG at {searxng_base_url}")
+        searxng = searxng_client
+    else:
+        click.echo(
+            f"SearXNG not reachable at {searxng_base_url} — name search, data broker, "
+            f"and social media will use manual-check links only this run."
+        )
+        searxng = None
+
     scanners: list[Scanner] = [
-        NameSearchScanner(),
+        NameSearchScanner(searxng),
         ReverseImageScanner(),
-        DataBrokerScanner(),
-        SocialMediaScanner(),
+        DataBrokerScanner(searxng),
+        SocialMediaScanner(searxng),
     ]
     api_key = config.get("hibp", {}).get("api_key")
     if api_key:

@@ -21,6 +21,13 @@ _CONFIG_TEMPLATE = """\
 [hibp]
 # api_key = "your-hibp-api-key"
 
+[searxng]
+# Optional. Enables real automated name/social-media/data-broker search via a
+# self-hosted SearXNG instance (see README). Leaving this unset defaults to
+# http://localhost:8080 — change it here if you move SearXNG to another host
+# (e.g. a homelab server) later; no code change is needed.
+# base_url = "http://localhost:8080"
+
 [target]
 # name = "Jane Doe"
 # emails = ["jane@example.com"]

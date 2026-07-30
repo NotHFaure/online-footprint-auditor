@@ -19,22 +19,42 @@ from dataclasses import dataclass
 class BrokerEntry:
     name: str
     url: str
+    domain: str
     supports_automated_optout: bool
 
 
 BROKERS: list[BrokerEntry] = [
-    BrokerEntry("Spokeo", "https://www.spokeo.com/search", False),
-    BrokerEntry("WhitePages", "https://www.whitepages.com/", False),
-    BrokerEntry("BeenVerified", "https://www.beenverified.com/app/optout/search", False),
-    BrokerEntry("Intelius", "https://www.intelius.com/", False),
-    BrokerEntry("MyLife", "https://www.mylife.com", False),
-    BrokerEntry("Nuwber", "https://nuwber.com/", False),
-    BrokerEntry("Radaris", "https://radaris.com/", False),
-    BrokerEntry("SmartBackgroundChecks", "https://www.smartbackgroundchecks.com/", False),
-    BrokerEntry("That's Them", "https://thatsthem.com/", False),
-    BrokerEntry("AdvancedBackgroundChecks", "https://www.advancedbackgroundchecks.com", False),
-    BrokerEntry("FamilyTreeNow", "https://www.familytreenow.com/optout", False),
-    BrokerEntry("FastPeopleSearch", "https://www.fastpeoplesearch.com/", False),
-    BrokerEntry("USPhoneBook", "https://www.usphonebook.com/opt-out/", False),
-    BrokerEntry("CheckPeople", "https://checkpeople.com/privacy-rights", False),
+    BrokerEntry("Spokeo", "https://www.spokeo.com/search", "spokeo.com", False),
+    BrokerEntry("WhitePages", "https://www.whitepages.com/", "whitepages.com", False),
+    BrokerEntry(
+        "BeenVerified",
+        "https://www.beenverified.com/app/optout/search",
+        "beenverified.com",
+        False,
+    ),
+    BrokerEntry("Intelius", "https://www.intelius.com/", "intelius.com", False),
+    BrokerEntry("MyLife", "https://www.mylife.com", "mylife.com", False),
+    BrokerEntry("Nuwber", "https://nuwber.com/", "nuwber.com", False),
+    BrokerEntry("Radaris", "https://radaris.com/", "radaris.com", False),
+    BrokerEntry(
+        "SmartBackgroundChecks",
+        "https://www.smartbackgroundchecks.com/",
+        "smartbackgroundchecks.com",
+        False,
+    ),
+    BrokerEntry("That's Them", "https://thatsthem.com/", "thatsthem.com", False),
+    BrokerEntry(
+        "AdvancedBackgroundChecks",
+        "https://www.advancedbackgroundchecks.com",
+        "advancedbackgroundchecks.com",
+        False,
+    ),
+    BrokerEntry(
+        "FamilyTreeNow", "https://www.familytreenow.com/optout", "familytreenow.com", False
+    ),
+    BrokerEntry(
+        "FastPeopleSearch", "https://www.fastpeoplesearch.com/", "fastpeoplesearch.com", False
+    ),
+    BrokerEntry("USPhoneBook", "https://www.usphonebook.com/opt-out/", "usphonebook.com", False),
+    BrokerEntry("CheckPeople", "https://checkpeople.com/privacy-rights", "checkpeople.com", False),
 ]

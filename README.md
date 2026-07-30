@@ -6,7 +6,7 @@ This repository contains tool code only — no scan results, target data, or cre
 
 ## Status
 
-Core scanning, scoring, output generation, and remediation are implemented and wired into a CLI. Automated unit tests (Phase 6) are not written yet.
+Core scanning, scoring, output generation, remediation, and the CLI are implemented, with automated unit tests for the non-trivial logic (scoring, remediation state machine, storage).
 
 ## Install
 
@@ -36,6 +36,21 @@ uv run footprint-auditor remediate --finding-id <id> --confirm-sent
 ```
 
 Only applies to `data_broker` findings. The first form writes manual opt-out instructions (or submits automatically, for the handful of brokers that support it — most don't yet); the second marks it `REQUESTED` once you've actually sent the request yourself.
+
+## Automated search (optional)
+
+By default, name search, data-broker checks, and social-media search generate manual, ready-to-click links for you to review — no automated network calls happen. If you'd rather get real automated results, run a self-hosted [SearXNG](https://docs.searxng.org/) instance and the tool will use it automatically, falling back to manual links for anything it doesn't find (or if SearXNG isn't running at all). No official free API exists for this kind of search; a self-hosted instance is the only free, Terms-of-Service-clean way to automate it — see `EP-2026-07-30-006` in this project's execution history for why.
+
+To stand one up locally with Docker:
+
+```
+docker run -d --name searxng -p 8080:8080 -v /path/to/config:/etc/searxng \
+  -e "BASE_URL=http://localhost:8080/" searxng/searxng:latest
+```
+
+Then add `search: formats: [html, json]` to the generated `settings.yml` in that config directory and restart the container — JSON output is disabled by default and this tool needs it.
+
+By default the tool looks for SearXNG at `http://localhost:8080`. If you run it elsewhere (e.g. a homelab server), set `[searxng] base_url` in `config.toml` — no code change needed.
 
 ## Private data
 
